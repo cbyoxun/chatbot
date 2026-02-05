@@ -8,7 +8,7 @@
 
 1. **克隆项目后，进入项目目录**
    ```bash
-   cd chat-nuxt
+   cd chatbot
    ```
 
 2. **复制环境变量配置**
@@ -21,9 +21,6 @@
    ```bash
    # 生产环境部署
    ./script/deploy.sh deploy
-   
-   # 或者开发环境部署
-   ./script/deploy.sh dev
    ```
 
 4. **访问应用**
