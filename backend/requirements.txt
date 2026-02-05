@@ -1,0 +1,16 @@
+# 核心依赖
+flask
+flask-cors
+python-dotenv
+
+# 文档处理
+python-multipart
+markdown
+
+# AI 集成
+openai
+anthropic
+
+# 测试
+pytest
+pytest-cov
