@@ -4,7 +4,7 @@ services:
   # PostgreSQL 数据库服务
   db:
     image: postgres:15
-    container_name: chat-bot
+    container_name: chat-db
     restart: always
     environment:
       POSTGRES_DB: chat_db
@@ -26,7 +26,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: chat-bot
+    container_name: chat-backend
     restart: always
     ports:
       - "5001:5001"
@@ -52,7 +52,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: chat-bot
+    container_name: chat-frontend
     restart: always
     ports:
       - "3000:3000"
