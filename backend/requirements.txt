@@ -2,6 +2,7 @@
 flask
 flask-cors
 python-dotenv
+psycopg2-binary
 
 # 文档处理
 python-multipart

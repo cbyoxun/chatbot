@@ -24,12 +24,21 @@ def health_check():
 app.add_url_rule('/api/health', 'health', health_check)
 
 # 导入路由
-from api import docs, qa, config
+from api import docs, qa, config, chat, upload
 
 # 注册蓝图
 app.register_blueprint(docs.bp, url_prefix='/api/docs')
 app.register_blueprint(qa.bp, url_prefix='/api/qa')
 app.register_blueprint(config.bp, url_prefix='/api/config')
+app.register_blueprint(chat.bp, url_prefix='/api/chats')
+app.register_blueprint(upload.bp, url_prefix='/api/upload')
+
+# 提供静态文件访问
+from flask import send_from_directory
+
+@app.route('/uploads/<path:filename>')
+def download_file(filename):
+    return send_from_directory('uploads', filename, as_attachment=False)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5002, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
