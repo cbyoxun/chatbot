@@ -11,6 +11,9 @@ markdown
 openai
 anthropic
 
+# 部署
+gunicorn
+
 # 测试
 pytest
 pytest-cov

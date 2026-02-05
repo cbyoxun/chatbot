@@ -17,6 +17,12 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB 限制
 # 确保上传目录存在
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+# 添加健康检查端点
+def health_check():
+    return {'status': 'healthy'}, 200
+
+app.add_url_rule('/api/health', 'health', health_check)
+
 # 导入路由
 from api import docs, qa, config
 
