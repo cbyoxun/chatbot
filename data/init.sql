@@ -25,6 +25,17 @@ CREATE TABLE IF NOT EXISTS config (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 创建AI服务商表
+CREATE TABLE IF NOT EXISTS ai_providers (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    provider_type VARCHAR(50) NOT NULL,
+    host VARCHAR(500) NOT NULL,
+    api_key TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 创建聊天会话表
 CREATE TABLE IF NOT EXISTS chats (
     id VARCHAR(36) PRIMARY KEY,
@@ -57,3 +68,8 @@ INSERT INTO config (config_key, config_value) VALUES
 ('max_upload_size', '16777216'),
 ('allowed_file_types', 'pdf,doc,docx,txt,md')
 ON CONFLICT (config_key) DO UPDATE SET config_value = EXCLUDED.config_value;
+
+-- 插入默认AI服务商
+INSERT INTO ai_providers (name, provider_type, host, api_key) VALUES 
+('OpenAI', 'openai', 'https://api.openai.com/v1', '')
+ON CONFLICT DO NOTHING;

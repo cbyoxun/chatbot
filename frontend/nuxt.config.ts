@@ -10,12 +10,7 @@ export default defineNuxtConfig({
   ],
 
   // 添加静态生成配置
-  ssr: false, // 禁用服务器端渲染
-  generate: {
-    // 配置静态生成选项
-    routes: ['/'] // 预生成的路由
-  },
-
+  ssr: false,
   devtools: {
     enabled: false
   },
@@ -41,7 +36,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:5001/api'
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || '/api'
     }
   },
 
@@ -65,6 +60,11 @@ export default defineNuxtConfig({
     // 启用并行构建
     parallel: true
   },
+  // 禁用服务器端渲染
+  generate: {
+    // 配置静态生成选项
+    routes: ['/'] // 预生成的路由
+  },
 
   // 暂时禁用预渲染以解决构建问题
   // routeRules: {
@@ -87,6 +87,14 @@ export default defineNuxtConfig({
     },
     experimental: {
       openAPI: true
+    },
+    // 代理配置
+    devProxy: {
+      '/api': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+        secure: false
+      }
     }
   },
 
@@ -108,6 +116,16 @@ export default defineNuxtConfig({
     build: {
       // 禁用源码映射以加快构建
       sourcemap: false
+    },
+    // 开发服务器代理配置
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:5001',
+          changeOrigin: true,
+          secure: false
+        }
+      }
     }
   },
 

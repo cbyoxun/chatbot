@@ -50,6 +50,37 @@ case "${1:-deploy}" in
         echo "🔗 后端API开发服务器: http://localhost:5001/api"
         ;;
     
+    "frontend-only")
+        echo "🏗️  仅构建并启动前端服务..."
+        # 检查后端服务是否运行
+        if ! docker ps --format '{{.Names}}' | grep -q 'chat-backend'; then
+            echo "⚠️  后端服务未运行，建议先启动后端服务"
+            echo "   运行: ./script/deploy.sh backend-only"
+        fi
+        
+        # 构建并启动前端
+        docker-compose up --build -d frontend
+        
+        echo "⏳ 等待前端服务启动..."
+        sleep 5
+        
+        echo "✅ 前端服务构建完成！"
+        echo "🌐 前端访问地址: http://localhost:3000"
+        ;;
+    
+    "backend-only")
+        echo "🏗️  仅构建并启动后端服务..."
+        # 构建并启动后端和数据库
+        docker-compose up --build -d db backend
+        
+        echo "⏳ 等待后端服务启动..."
+        sleep 8
+        
+        echo "✅ 后端服务构建完成！"
+        echo "🔗 后端API地址: http://localhost:5001/api"
+        echo "💾 数据库地址: localhost:5432 (数据库: chat_db, 用户: chat_user)"
+        ;;
+    
     "stop")
         echo "🛑 停止所有服务..."
         docker-compose down
@@ -72,6 +103,16 @@ case "${1:-deploy}" in
         docker-compose -f docker-compose.dev.yml logs -f
         ;;
         
+    "logs-frontend")
+        echo "📋 查看前端服务日志..."
+        docker-compose logs -f frontend
+        ;;
+        
+    "logs-backend")
+        echo "📋 查看后端服务日志..."
+        docker-compose logs -f backend
+        ;;
+        
     "clean")
         echo "🧹 清理所有容器、网络和未使用的镜像..."
         docker-compose down -v
@@ -89,14 +130,18 @@ case "${1:-deploy}" in
         
     *)
         echo "📖 使用说明:"
-        echo "  $0 deploy     - 构建并启动生产环境 (默认)"
-        echo "  $0 dev        - 构建并启动开发环境"
-        echo "  $0 stop       - 停止生产环境"
-        echo "  $0 stop-dev   - 停止开发环境"
-        echo "  $0 logs       - 查看生产环境日志"
-        echo "  $0 logs-dev   - 查看开发环境日志"
-        echo "  $0 clean      - 清理所有资源"
-        echo "  $0 rebuild    - 重新构建镜像并启动"
+        echo "  $0 deploy         - 构建并启动生产环境 (默认)"
+        echo "  $0 dev            - 构建并启动开发环境"
+        echo "  $0 frontend-only  - 仅构建并启动前端服务"
+        echo "  $0 backend-only   - 仅构建并启动后端服务"
+        echo "  $0 stop           - 停止所有服务"
+        echo "  $0 stop-dev       - 停止开发环境"
+        echo "  $0 logs           - 查看所有服务日志"
+        echo "  $0 logs-dev       - 查看开发环境日志"
+        echo "  $0 logs-frontend  - 查看前端服务日志"
+        echo "  $0 logs-backend   - 查看后端服务日志"
+        echo "  $0 clean          - 清理所有资源"
+        echo "  $0 rebuild        - 重新构建镜像并启动"
         exit 1
         ;;
 esac

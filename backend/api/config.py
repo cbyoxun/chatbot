@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -93,6 +93,154 @@ def get_config_key(key):
             return jsonify({"error": "Config not found"}), 404
         
         return jsonify({"value": config['config_value']})
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# AI服务商管理API
+@bp.route('/ai-providers', methods=['GET'])
+def get_ai_providers():
+    """获取所有AI服务商"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cur.execute("SELECT id, name, provider_type, host FROM ai_providers")
+        providers = cur.fetchall()
+        
+        cur.close()
+        conn.close()
+        
+        return jsonify(providers)
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/ai-providers/<int:id>', methods=['GET'])
+def get_ai_provider(id):
+    """获取指定AI服务商详情"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cur.execute("SELECT * FROM ai_providers WHERE id = %s", (id,))
+        provider = cur.fetchone()
+        
+        cur.close()
+        conn.close()
+        
+        if not provider:
+            return jsonify({"error": "Provider not found"}), 404
+        
+        return jsonify(provider)
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/ai-providers', methods=['POST'])
+def add_ai_provider():
+    """添加新AI服务商"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        required_fields = ['name', 'provider_type', 'host', 'api_key']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute(
+            "INSERT INTO ai_providers (name, provider_type, host, api_key) "
+            "VALUES (%s, %s, %s, %s) RETURNING id",
+            (data['name'], data['provider_type'], data['host'], data['api_key'])
+        )
+        provider_id = cur.fetchone()[0]
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return jsonify({"id": provider_id, "message": "Provider added successfully"}), 201
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/ai-providers/<int:id>', methods=['PUT'])
+def update_ai_provider(id):
+    """更新AI服务商"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # 构建更新语句
+        update_fields = []
+        values = []
+        
+        if 'name' in data:
+            update_fields.append("name = %s")
+            values.append(data['name'])
+        if 'provider_type' in data:
+            update_fields.append("provider_type = %s")
+            values.append(data['provider_type'])
+        if 'host' in data:
+            update_fields.append("host = %s")
+            values.append(data['host'])
+        if 'api_key' in data:
+            update_fields.append("api_key = %s")
+            values.append(data['api_key'])
+        
+        if not update_fields:
+            return jsonify({"error": "No fields to update"}), 400
+        
+        update_fields.append("updated_at = CURRENT_TIMESTAMP")
+        values.append(id)
+        
+        cur.execute(
+            f"UPDATE ai_providers SET {', '.join(update_fields)} WHERE id = %s",
+            values
+        )
+        
+        if cur.rowcount == 0:
+            cur.close()
+            conn.close()
+            return jsonify({"error": "Provider not found"}), 404
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return jsonify({"message": "Provider updated successfully"})
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/ai-providers/<int:id>', methods=['DELETE'])
+def delete_ai_provider(id):
+    """删除AI服务商"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("DELETE FROM ai_providers WHERE id = %s", (id,))
+        
+        if cur.rowcount == 0:
+            cur.close()
+            conn.close()
+            return jsonify({"error": "Provider not found"}), 404
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return jsonify({"message": "Provider deleted successfully"})
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
